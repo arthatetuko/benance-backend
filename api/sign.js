@@ -20,6 +20,12 @@ export default function handler(req, res) {
   }
 
   const { wallet, score, timestamp } = req.body;
+  // ===== EXPIRE CHECK =====
+const now = Date.now();
+
+if (now - timestamp > 60000) { // 60 detik
+  return res.status(400).json({ error: "Request expired" });
+}
 
   if (!wallet || !score || !timestamp) {
     return res.status(400).json({ error: "Missing data" });
@@ -38,3 +44,4 @@ export default function handler(req, res) {
 
   return res.status(200).json({ signature });
 }
+
