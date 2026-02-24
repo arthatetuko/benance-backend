@@ -1,8 +1,17 @@
+import EC from "elliptic";
 import crypto from "crypto";
 
-const PRIVATE_KEY = "X9skLm72Pqa81ZnYtR04wLp9";
+const ec = new EC.ec("secp256k1");
 
 export default function handler(req, res) {
+
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -14,16 +23,23 @@ export default function handler(req, res) {
     return res.status(400).json({ error: "Missing data" });
   }
 
-  if (score > 200) {
-    return res.status(400).json({ error: "Score too high" });
+  const privateKey = process.env.PRIVATE_KEY;
+
+  if (!privateKey) {
+    return res.status(500).json({ error: "Private key not set" });
   }
+
+  const key = ec.keyFromPrivate(privateKey, "hex");
 
   const message = wallet + ":" + score + ":" + timestamp;
 
-  const signature = crypto
-    .createHmac("sha256", PRIVATE_KEY)
+  const messageHash = crypto
+    .createHash("sha256")
     .update(message)
-    .digest("hex");
+    .digest();
 
-  res.status(200).json({ signature });
+  const signature = key.sign(messageHash);
+  const signatureHex = signature.toDER("hex");
+
+  return res.status(200).json({ signature: signatureHex });
 }
