@@ -1,8 +1,9 @@
-import { ec as EC } from "elliptic";
+const EC = require("elliptic").ec;
+const crypto = require("crypto");
 
 const ec = new EC("secp256k1");
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
 
   // ===== CORS =====
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -25,22 +26,21 @@ export default function handler(req, res) {
 
   const privateKey = process.env.PRIVATE_KEY;
 
+  if (!privateKey) {
+    return res.status(500).json({ error: "Private key not set" });
+  }
+
   const key = ec.keyFromPrivate(privateKey, "hex");
 
-  // Message format
   const message = wallet + ":" + score + ":" + timestamp;
 
-  // Hash message (simple SHA256)
-  const crypto = require("crypto");
   const messageHash = crypto
     .createHash("sha256")
     .update(message)
     .digest();
 
   const signature = key.sign(messageHash);
-
   const signatureHex = signature.toDER("hex");
 
   return res.status(200).json({ signature: signatureHex });
-}
-
+};
