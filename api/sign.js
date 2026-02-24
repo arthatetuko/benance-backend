@@ -1,47 +1,46 @@
-import crypto from "crypto";
+import { ec as EC } from "elliptic";
 
-const PRIVATE_KEY = "X9skLm72Pqa81ZnYtR04wLp9";
+const ec = new EC("secp256k1");
 
 export default function handler(req, res) {
 
-  // ===== CORS HEADERS =====
+  // ===== CORS =====
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Handle preflight request
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-  // =========================
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   const { wallet, score, timestamp } = req.body;
-  // ===== EXPIRE CHECK =====
-const now = Date.now();
-
-if (now - timestamp > 60000) { // 60 detik
-  return res.status(400).json({ error: "Request expired" });
-}
 
   if (!wallet || !score || !timestamp) {
     return res.status(400).json({ error: "Missing data" });
   }
 
-  if (score > 200) {
-    return res.status(400).json({ error: "Score too high" });
-  }
+  const privateKey = process.env.PRIVATE_KEY;
 
+  const key = ec.keyFromPrivate(privateKey, "hex");
+
+  // Message format
   const message = wallet + ":" + score + ":" + timestamp;
 
-  const signature = crypto
-    .createHmac("sha256", PRIVATE_KEY)
+  // Hash message (simple SHA256)
+  const crypto = require("crypto");
+  const messageHash = crypto
+    .createHash("sha256")
     .update(message)
-    .digest("hex");
+    .digest();
 
-  return res.status(200).json({ signature });
+  const signature = key.sign(messageHash);
+
+  const signatureHex = signature.toDER("hex");
+
+  return res.status(200).json({ signature: signatureHex });
 }
 
