@@ -1,9 +1,9 @@
-const EC = require("elliptic").ec;
-const crypto = require("crypto");
+import EC from "elliptic";
+import crypto from "crypto";
 
-const ec = new EC("secp256k1");
+const ec = new EC.ec("secp256k1");
 
-module.exports = function handler(req, res) {
+export default function handler(req, res) {
 
   // ===== CORS =====
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -43,4 +43,4 @@ module.exports = function handler(req, res) {
   const signatureHex = signature.toDER("hex");
 
   return res.status(200).json({ signature: signatureHex });
-};
+}
