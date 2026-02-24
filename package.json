@@ -1,0 +1,8 @@
+{
+  "name": "benance-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "elliptic": "^6.6.1"
+  }
+}
