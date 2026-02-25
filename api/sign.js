@@ -1,7 +1,8 @@
-import EC from "elliptic";
+import elliptic from "elliptic";
 import crypto from "crypto";
 
-const ec = new EC.ec("secp256k1");
+const EC = elliptic.ec;
+const ec = new EC("secp256k1");
 
 export default function handler(req, res) {
 
@@ -19,7 +20,7 @@ export default function handler(req, res) {
 
   const { wallet, score, timestamp } = req.body;
 
-  if (!wallet || !score || !timestamp) {
+  if (!wallet  !score  !timestamp) {
     return res.status(400).json({ error: "Missing data" });
   }
 
@@ -39,7 +40,16 @@ export default function handler(req, res) {
     .digest();
 
   const signature = key.sign(messageHash);
-  const signatureHex = signature.toDER("hex");
 
-  return res.status(200).json({ signature: signatureHex });
+  const r = signature.r.toArray("be", 32);
+  const s = signature.s.toArray("be", 32);
+
+  const signatureBytes = Buffer.concat([
+    Buffer.from(r),
+    Buffer.from(s)
+  ]);
+
+  const signatureBase64 = signatureBytes.toString("base64");
+
+  return res.status(200).json({ signature: signatureBase64 });
 }
