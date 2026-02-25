@@ -1,11 +1,21 @@
-import pkg from "elliptic";
+import elliptic from "elliptic";
 import crypto from "crypto";
 
-const { ec: EC } = pkg;
+const EC = elliptic.ec;
 const ec = new EC("secp256k1");
 
 export default async function handler(req, res) {
   try {
+
+    // ✅ CORS HEADERS
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+    // ✅ Handle preflight
+    if (req.method === "OPTIONS") {
+      return res.status(200).end();
+    }
 
     if (req.method !== "POST") {
       return res.status(405).json({ error: "Method not allowed" });
@@ -17,6 +27,7 @@ export default async function handler(req, res) {
 
     const { wallet, score, timestamp } = body;
 
+    // ⚠️ FIX ERROR DI SINI JUGA
     if (!wallet || !score || !timestamp) {
       return res.status(400).json({ error: "Missing data" });
     }
@@ -29,7 +40,7 @@ export default async function handler(req, res) {
 
     const key = ec.keyFromPrivate(privateKey, "hex");
 
-    const message = wallet + ":" + score + ":" + timestamp;
+    const message = `${wallet}:${score}:${timestamp}`;
 
     const messageHash = crypto
       .createHash("sha256")
@@ -50,8 +61,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ signature: signatureBase64 });
 
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Server error" });
   }
 }
