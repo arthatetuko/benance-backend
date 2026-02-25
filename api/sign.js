@@ -20,7 +20,8 @@ export default function handler(req, res) {
 
   const { wallet, score, timestamp } = req.body;
 
-  if (!wallet  !score  !timestamp) {
+  // ✅ FIXED LINE
+  if (!wallet || !score || !timestamp) {
     return res.status(400).json({ error: "Missing data" });
   }
 
