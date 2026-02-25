@@ -1,7 +1,8 @@
-import EC from "elliptic";
+import elliptic from "elliptic";
 import crypto from "crypto";
 
-const ec = new EC.ec("secp256k1");
+const EC = elliptic.ec;
+const ec = new EC("secp256k1");
 
 export default function handler(req, res) {
 
