@@ -6,7 +6,6 @@ const ec = new EC("secp256k1");
 
 export default async function handler(req, res) {
 
-  // ✅ CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -15,21 +14,26 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
   try {
-    const { wallet, score } = req.body;
-
-    if (!wallet || score === undefined) {
-      return res.status(400).json({ error: "Missing data" });
-    }
 
     const privateKey = process.env.PRIVATE_KEY;
 
     if (!privateKey) {
-      return res.status(500).json({ error: "Private key not set" });
+      return res.status(500).json({ error: "PRIVATE_KEY not set" });
+    }
+
+    if (privateKey.length !== 64) {
+      return res.status(500).json({ error: "PRIVATE_KEY invalid length", length: privateKey.length });
+    }
+
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
+
+    const { wallet, score } = req.body;
+
+    if (!wallet || score === undefined) {
+      return res.status(400).json({ error: "Missing wallet or score" });
     }
 
     const timestamp = Math.floor(Date.now() / 1000);
@@ -50,7 +54,9 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error("SIGN ERROR:", err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("CRASH:", err);
+    return res.status(500).json({
+      error: err.toString()
+    });
   }
 }
