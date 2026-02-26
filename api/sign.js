@@ -1,10 +1,10 @@
-import elliptic from "elliptic";
-import crypto from "crypto";
+const elliptic = require("elliptic");
+const crypto = require("crypto");
 
 const EC = elliptic.ec;
 const ec = new EC("secp256k1");
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
 
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -16,16 +16,6 @@ export default async function handler(req, res) {
 
   try {
 
-    const privateKey = process.env.PRIVATE_KEY;
-
-    if (!privateKey) {
-      return res.status(500).json({ error: "PRIVATE_KEY not set" });
-    }
-
-    if (privateKey.length !== 64) {
-      return res.status(500).json({ error: "PRIVATE_KEY invalid length", length: privateKey.length });
-    }
-
     if (req.method !== "POST") {
       return res.status(405).json({ error: "Method not allowed" });
     }
@@ -34,6 +24,12 @@ export default async function handler(req, res) {
 
     if (!wallet || score === undefined) {
       return res.status(400).json({ error: "Missing wallet or score" });
+    }
+
+    const privateKey = process.env.PRIVATE_KEY;
+
+    if (!privateKey) {
+      return res.status(500).json({ error: "PRIVATE_KEY not set" });
     }
 
     const timestamp = Math.floor(Date.now() / 1000);
@@ -55,7 +51,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error("CRASH:", err);
-    return res.status(500).json({
-      error: err.toString()
-    });
+    return res.status(500).json({ error: err.toString() });
   }
+};
