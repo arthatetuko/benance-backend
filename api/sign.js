@@ -42,12 +42,13 @@ module.exports = async function handler(req, res) {
 
     const signature = key.sign(hash);
 
-    const signatureHex = signature.toDER("hex");
+    const signatureDER = signature.toDER();
+const signatureBase64 = Buffer.from(signatureDER).toString("base64");
 
-    return res.status(200).json({
-      signature: signatureHex,
-      timestamp
-    });
+return res.status(200).json({
+  signature: signatureBase64,
+  timestamp
+});
 
   } catch (err) {
     console.error("CRASH:", err);
