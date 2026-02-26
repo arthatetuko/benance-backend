@@ -40,13 +40,17 @@ module.exports = async function handler(req, res) {
 
     const key = ec.keyFromPrivate(privateKey, "hex");
 
-    const signature = key.sign(hash);
+    const sig = key.sign(hash);
 
-    const signatureDER = signature.toDER();
-const signatureBase64 = Buffer.from(signatureDER).toString("base64");
+// r dan s masing-masing 32 byte
+const r = sig.r.toArrayLike(Buffer, "be", 32);
+const s = sig.s.toArrayLike(Buffer, "be", 32);
+
+// gabungkan jadi 64 byte
+const signature64 = Buffer.concat([r, s]).toString("base64");
 
 return res.status(200).json({
-  signature: signatureBase64,
+  signature: signature64,
   timestamp
 });
 
