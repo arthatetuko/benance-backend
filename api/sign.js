@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
 
     const timestamp = Math.floor(Date.now() / 1000);
 
-    const message = ${wallet}:${score}:${timestamp};
+   const message = `${wallet}:${score}:${timestamp}`;
 
     const hash = crypto.createHash("sha256").update(message).digest();
 
