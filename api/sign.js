@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: "PRIVATE_KEY not set" });
     }
 
-    const timestamp = Math.floor(Date.now() / 1000);
+    const timestamp = Math.floor(Date.now() / 1000) - 10;
 
    const message = `${wallet}:${score}:${timestamp}`;
 
