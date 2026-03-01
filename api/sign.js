@@ -1,3 +1,4 @@
+const axios = require("axios");
 const elliptic = require("elliptic");
 const crypto = require("crypto");
 
@@ -32,7 +33,16 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: "PRIVATE_KEY not set" });
     }
 
-    const timestamp = Math.floor(Date.now() / 1000);
+    // ===== GET BLOCK TIME FROM TERRA =====
+const block = await axios.get(
+  "https://terra-classic-rpc.publicnode.com/block"
+);
+
+const blockTime = new Date(
+  block.data.result.block.header.time
+).getTime();
+
+const timestamp = Math.floor(blockTime / 1000) - 5;
 
    const message = `${wallet}:${score}:${timestamp}`;
 

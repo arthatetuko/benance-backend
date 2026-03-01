@@ -2,6 +2,7 @@
   "name": "benance-backend",
   "version": "1.0.0",
   "dependencies": {
+    "axios": "^1.13.6",
     "elliptic": "^6.6.1"
   }
 }
